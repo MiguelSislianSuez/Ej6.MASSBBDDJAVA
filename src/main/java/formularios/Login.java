@@ -91,15 +91,23 @@ public class Login extends JDialog{
 	}
 
 	protected void cancelar() {
+	
+			if (dc == null) {//si no es igual a null...entonces vamos al dialogo
 		
-		if (dc == null) {
 			System.exit(DO_NOTHING_ON_CLOSE);
-		
-		}//si no es igual a null...etnocnces vamos al dialogo
-		 dc.setVisible(true);
-		 setVisible(false);
+			
+			 dc.setVisible(true);
+			 setVisible(false);
+			 
+			}else if (DialogCliente.limpiar = true) { //si se da la condicion limpiar datos del log
+					txtUser.setText("");
+					txtPwd.setText("");
+				
+					
+		}
 		
 	}
+
 
 	private void aceptar() {
 		if("".equals(txtUser.getText())) {//si lacadena es equals a el txtUser pide
