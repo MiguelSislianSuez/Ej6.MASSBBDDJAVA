@@ -13,6 +13,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -153,7 +154,7 @@ public class DialogCliente extends JFrame {
 		itmActBajas.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				mostrarActualesBajas();
 
 			}
 		});
@@ -166,8 +167,7 @@ public class DialogCliente extends JFrame {
 		itmHistoria.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-
+				mostrarHistorico();
 			}
 		});
 
@@ -179,8 +179,7 @@ public class DialogCliente extends JFrame {
 		itmResponsable.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-
+				mostrarResponsableAula();
 			}
 		});
 
@@ -198,18 +197,119 @@ public class DialogCliente extends JFrame {
 		setJMenuBar(menuBar);
 	}
 
+	protected void mostrarResponsableAula() {
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
+					this.usuario, this.contrasena);
+
+			String cod = JOptionPane.showInputDialog(this, "Introduzca Responsable o aula", "Cargar datos",
+					JOptionPane.QUESTION_MESSAGE);
+			if (cod == null || cod.equals("")) {// si dni es diferente a null y a campo vacio sale del dialogo
+
+				// if (cod == null) {
+				JOptionPane.showMessageDialog(this, "No existe ningún cliente con el código " + cod, "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+
+			PreparedStatement ps;
+			String consulta = "SELECT * FROM Actual WHERE Resp LIKE ? OR local LIKE ? ";
+
+			ps = conn.prepareStatement(consulta);
+			ps.setString(1, cod);
+			ps.setString(2, cod);
+
+			ResultSet rs = ps.executeQuery();// almacenamos consultaa
+
+			new VistaListados(rs);
+
+		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
+
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException ex1) {
+					System.out.println("Excepción. Cerrando conexión");
+				}
+			}
+		}
+
+	}
+
+	protected void mostrarHistorico() {
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
+					this.usuario, this.contrasena);
+
+			PreparedStatement ps;
+			String consulta = "SELECT * FROM Historico";
+
+			ps = conn.prepareStatement(consulta);
+
+			ResultSet rs = ps.executeQuery();// almacenamos consultaa
+
+			new VistaListados(rs);
+
+		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
+
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException ex1) {
+					System.out.println("Excepción. Cerrando conexión");
+				}
+			}
+		}
+
+	}
+
+	protected void mostrarActualesBajas() {
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
+					this.usuario, this.contrasena);
+
+			PreparedStatement ps;
+			String consulta = "SELECT * FROM actual";
+
+			ps = conn.prepareStatement(consulta);
+
+			ResultSet rs = ps.executeQuery();// almacenamos consultaa
+
+			new VistaListados(rs);
+
+		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
+
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException ex1) {
+					System.out.println("Excepción. Cerrando conexión");
+				}
+			}
+		}
+
+	}
+
 	protected void mostrarActual() {
 
 		Connection conn = null;
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/Acme?serverTimezone=Europe/Madrid", this.usuario,
-					this.contrasena);
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
+					this.usuario, this.contrasena);
 
 			PreparedStatement ps;
-			String consulta = "SELECT * FROM liceo.actual where cod not in (select cod from liceo.actual where length(fecbaja)>1);";
-			
+			String consulta = "SELECT * FROM liceo.actual WHERE cod NOT IN (SELECT cod FROM liceo.actual WHERE length(fecbaja)>1)";
+
 			ps = conn.prepareStatement(consulta);
-			
+
 			ResultSet rs = ps.executeQuery();// almacenamos consultaa
 
 			new VistaListados(rs);
@@ -251,28 +351,8 @@ public class DialogCliente extends JFrame {
 				return;
 
 			}
-
-			PreparedStatement ps = conn.prepareStatement(
-					"SELECT Cod, Des, Tipo, Marca, Modelo, NumSerie, Resp, Local, FecAlta, FecMod, FecBaja, Motivo, Obs FROM actual WHERE Cod = ?");
-			ps.setString(1, cod);// valor un que se gurda en resultst
-			ResultSet rs = ps.executeQuery(); //
-			if (rs.first()) {
-
-				txtCodigo.setText(cod);
-				// txtCodigo.setEditable(false);
-				txtDescripcion.setText(rs.getString("Des"));
-				txtTipo.setSelectedItem(rs.getString("Tipo"));
-				txtmarca.setText(rs.getString("Marca"));
-				txtmodelo.setText(rs.getString("Modelo"));
-				txtNumSerie.setText(rs.getString("NumSerie"));
-				txtResponsable.setText(rs.getString("Resp"));
-				txtLocalAula.setText(rs.getString("Local"));
-				txtFechaModificacion.setText(rs.getTimestamp("FecMod") + "");
-				txtFechaAlta.setText(rs.getTimestamp("FecAlta") + "");
-				txtFechaBaja.setText(rs.getTimestamp("FecBaja") + "");
-				txtMotBaja.setText(rs.getString("Motivo"));
-				txtObservaciones.setText(rs.getString("Obs"));
-			}
+			
+		mostrarDatos(conn, cod);
 			isCrear = true;
 
 		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
@@ -404,15 +484,64 @@ public class DialogCliente extends JFrame {
 		pnlBotons.add(btnGrabar);
 
 		JButton btnBaja = new JButton("Dar de baja");
-		btnGrabar.addActionListener(new ActionListener() {
+		btnBaja.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-
+				darDeBaja();
 			}
 		});
 		pnlBotons.add(btnBaja);
 		add(pnlBotons, BorderLayout.SOUTH);
+	}
+
+	protected void darDeBaja() {
+
+		Connection conn = null;
+
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
+					this.usuario, this.contrasena);
+
+			String motivo = JOptionPane.showInputDialog(this, "Introduzca un motivo", "Dar de baja",
+					JOptionPane.QUESTION_MESSAGE);
+
+			if (motivo.equals("")) {// si dni es diferente a null y a campo vacio sale del dialogo
+				JOptionPane.showMessageDialog(this, "Debe introducir un motivo", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+
+			}
+
+			String consulta = "UPDATE actual SET FecBaja = current_timeStamp, Motivo = ? WHERE Cod = ?";
+			PreparedStatement ps = conn.prepareStatement(consulta);
+
+			ps.setString(1, motivo);
+			ps.setString(2, txtCodigo.getText());
+
+			ps.executeUpdate();
+
+			String consultaH = "INSERT INTO Historico (Cod, Des, Tipo, Marca, Modelo, NumSerie, Resp, Local, FecAlta, FecMod, FecBaja, Motivo, Obs) "
+					+ "SELECT Cod, Des, Tipo, Marca, Modelo, NumSerie, Resp, Local, FecAlta, FecMod, FecBaja, Motivo, Obs FROM Actual WHERE Cod = ?";
+
+			PreparedStatement ps2 = conn.prepareStatement(consultaH);
+			ps2.setString(1, txtCodigo.getText());
+
+			ps2.executeUpdate();
+			
+			mostrarDatos(conn, txtCodigo.getText());
+
+		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
+
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException ex1) {
+					System.out.println("Excepción. Cerrando conexión");
+				}
+			}
+		}
+
 	}
 
 	protected void grabarDatos() {
@@ -423,17 +552,16 @@ public class DialogCliente extends JFrame {
 					this.usuario, this.contrasena);
 			String consulta;
 			String consulta2;
-			String consultaActual = "Select max(cod) from actual;";
-			String consutlaHistorico = "Select max(cod) from historico;";
+			int codId = 0;
 
 			if (isCrear == false) {
-				consulta = "INSERT INTO actual (Des, Tipo, Marca, Modelo, NumSerie, Resp, Local,FecAlta, Obs) VALUES (?,?,?,?,?,?,?,current_timestamp,?)";
+				consulta = "INSERT INTO Actual (Des, Tipo, Marca, Modelo, NumSerie, Resp, Local,FecAlta, Obs) VALUES (?,?,?,?,?,?,?,current_timestamp,?)";
 			} else {
 				consulta = "UPDATE actual SET Des = ?, Tipo = ?, Marca = ?, Modelo = ?, NumSerie = ?, Resp = ?, Local = ?, FecAlta = current_timestamp, Motivo = ?, Obs = ? WHERE Cod = ?";
 			}
-//				consulta2 = "INSERT INTO actual (Cod, Des, Tipo, Marca, Modelo, NumSerie, Resp, Local,FecAlta, Obs) VALUES (?,?,?,?,?,?,?,?,current_timestamp,?)";
+			consulta2 = "INSERT INTO Historico (Cod, Des, Tipo, Marca, Modelo, NumSerie, Resp, Local,FecAlta, Obs) VALUES (?,?,?,?,?,?,?,?,current_timestamp,?)";
 
-			PreparedStatement ps = conn.prepareStatement(consulta);
+			PreparedStatement ps = conn.prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
 			// pasamos valores que queremos y hacemos las comprobaciones
 			if (txtDescripcion.getText().equals("")) {
 				JOptionPane.showMessageDialog(this, "Introduzca un valor para descripción", "Error",
@@ -473,46 +601,53 @@ public class DialogCliente extends JFrame {
 
 			ps.setString(7, !txtLocalAula.getText().equals("") ? txtLocalAula.getText() : null);
 
-			// ps.setString(9, !txtFechaAlta.getText().equals("") ? txtFechaAlta.getText() :
-			// null);
-
-			// ps.setString(10, !txtFechaModificacion.getText().equals("") ?
-			// txtFechaModificacion.getText() : null);
-
-			// ps.setString(11, !txtFechaBaja.getText().equals("") ? txtFechaBaja.getText()
-			// : null);
-
-			// ps.setString(12, !txtResponsable.getText().equals("") ?
-			// txtResponsable.getText() : null);
-
-			// ps.setString(9, !txtMotBaja.getText().equals("") ? txtMotBaja.getText() :
-			// null);
-
 			ps.setString(8, !txtMotBaja.getText().equals("") ? txtMotBaja.getText() : null);
-			ps.executeUpdate();
 
-//			PreparedStatement ps2 = conn.prepareStatement(consulta2);
-//			
-//			ps.setString(1, "2");
-//			
-//			ps.setString(2, txtDescripcion.getText());
-//			
-//			ps.setString(3, txtTipo.getSelectedItem() + "");
-//
-//			
-//			ps.setString(4, txtmarca.getText());
-//			
-//			ps.setString(5, txtmodelo.getText());
-//
-//			ps.setString(6, !txtNumSerie.getText().equals("") ? txtNumSerie.getText() : null);
-//
-//			ps.setString(7, !txtResponsable.getText().equals("") ? txtResponsable.getText() : null);
-//			
-//			ps.setString(8, !txtLocalAula.getText().equals("") ? txtLocalAula.getText() : null);
-//			
-//			ps.setString(9, !txtMotBaja.getText().equals("") ? txtMotBaja.getText() : null);
-//
-//			ps2.executeUpdate();
+			int rowAffected = ps.executeUpdate();
+			if (rowAffected == 1) {
+				ResultSet rs = ps.getGeneratedKeys();// trae todas las clave primaria del resultado
+				if (rs.next()) {
+					// recordar llamar al next siempre que hagamos resultSet sino el cursor no
+					// apuntará a la siguiente fila
+					codId = rs.getInt(1); //
+				}
+
+			}
+
+			PreparedStatement ps2 = conn.prepareStatement(consulta2);
+			ps2.setInt(1, codId);
+			ps2.setString(2, txtDescripcion.getText());
+
+//			if (txtTipo.getText().equals("")) {
+//				JOptionPane.showMessageDialog(this, "Introduzca un valor para primer apellido", "Error",
+//						JOptionPane.ERROR_MESSAGE);
+//				return;
+//						}
+			ps2.setString(3, txtTipo.getSelectedItem() + "");
+
+			if (txtmarca.getText().equals("")) {
+				JOptionPane.showMessageDialog(this, "Introduzca un valor para marca", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			ps2.setString(4, txtmarca.getText());
+
+			if (txtmodelo.getText().equals("")) {
+				JOptionPane.showMessageDialog(this, "Introduzca un valor para primer modelo", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			ps2.setString(5, txtmodelo.getText());
+
+			ps2.setString(6, !txtNumSerie.getText().equals("") ? txtNumSerie.getText() : null);
+
+			ps2.setString(7, !txtResponsable.getText().equals("") ? txtResponsable.getText() : null);
+
+			ps2.setString(8, !txtLocalAula.getText().equals("") ? txtLocalAula.getText() : null);
+
+			ps2.setString(9, !txtMotBaja.getText().equals("") ? txtMotBaja.getText() : null);
+
+			ps2.executeUpdate();
 
 			String msResult;
 
@@ -544,6 +679,32 @@ public class DialogCliente extends JFrame {
 		login.setVisible(true);
 		setVisible(false);
 
+	}
+	
+	private void mostrarDatos(Connection conn, String cod) throws SQLException {
+		
+		PreparedStatement ps = conn.prepareStatement(
+				"SELECT Cod, Des, Tipo, Marca, Modelo, NumSerie, Resp, Local, FecAlta, FecMod, FecBaja, Motivo, Obs FROM actual WHERE Cod = ?");
+		ps.setString(1, cod);// valor un que se gurda en resultst
+		ResultSet rs = ps.executeQuery(); //
+		if (rs.first()) {
+
+			txtCodigo.setText(cod);
+			// txtCodigo.setEditable(false);
+			txtDescripcion.setText(rs.getString("Des"));
+			txtTipo.setSelectedItem(rs.getString("Tipo"));
+			txtmarca.setText(rs.getString("Marca"));
+			txtmodelo.setText(rs.getString("Modelo"));
+			txtNumSerie.setText(rs.getString("NumSerie"));
+			txtResponsable.setText(rs.getString("Resp"));
+			txtLocalAula.setText(rs.getString("Local"));
+			txtFechaModificacion.setText(rs.getTimestamp("FecMod") + "");
+			txtFechaAlta.setText(rs.getTimestamp("FecAlta") + "");
+			txtFechaBaja.setText(rs.getTimestamp("FecBaja") + "");
+			txtMotBaja.setText(rs.getString("Motivo"));
+			txtObservaciones.setText(rs.getString("Obs"));
+		}
+		
 	}
 
 }

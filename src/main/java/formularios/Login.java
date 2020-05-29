@@ -27,7 +27,6 @@ public class Login extends JDialog {
 	private JTextField txtUser;
 	private JPasswordField txtPwd;
 	private DialogCliente dc;
-	
 
 	public Login() {
 		super();
@@ -119,24 +118,23 @@ public class Login extends JDialog {
 		String usuario = txtUser.getText();
 		String password = String.valueOf(txtPwd.getPassword());
 
-
 		try {
-			
-	        if ("".equals(txtUser.getText())) {// si lacadena es equals a el txtUser pide
-                JOptionPane.showMessageDialog(this, "Introduzca usuario", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-        }
-        if (txtPwd.getPassword().length == 0 || txtPwd.getPassword() == null) {
-                JOptionPane.showMessageDialog(this, "Introduzca contraseña", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-        }
-        
-        conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
-            usuario, password);
-        
-        dc = new DialogCliente(txtUser.getText(), String.valueOf(txtPwd.getPassword()), this);
-        dc.setVisible(true);
-        this.setVisible(false);
+
+			if ("".equals(txtUser.getText())) {// si lacadena es equals a el txtUser pide
+				JOptionPane.showMessageDialog(this, "Introduzca usuario", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			if (txtPwd.getPassword().length == 0 || txtPwd.getPassword() == null) {
+				JOptionPane.showMessageDialog(this, "Introduzca contraseña", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid", usuario,
+					password);
+
+			dc = new DialogCliente(txtUser.getText(), String.valueOf(txtPwd.getPassword()), this);
+			dc.setVisible(true);
+			this.setVisible(false);
 //			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
 //					usuario, password);
 
@@ -152,8 +150,7 @@ public class Login extends JDialog {
 //
 //				return;
 //			}
-			
-			
+
 		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
 			JOptionPane.showMessageDialog(this, ex.getMessage(), "Contraseña erronea", JOptionPane.ERROR_MESSAGE);
 
@@ -166,11 +163,6 @@ public class Login extends JDialog {
 				}
 			}
 		}
-
-		dc = new DialogCliente(txtUser.getText(), String.valueOf(txtPwd.getPassword()), this);
-		dc.setVisible(true);
-		this.setVisible(false);
-
 	}
 }
 
