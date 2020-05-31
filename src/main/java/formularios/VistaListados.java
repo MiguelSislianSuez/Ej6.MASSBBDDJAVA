@@ -16,6 +16,7 @@ public class VistaListados extends JDialog{
 		super();
 		this.rs = rs;
 		this.setSize( 1000 , 500);
+		this.setResizable(false);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setLayout(new BorderLayout());

@@ -330,31 +330,32 @@ public class DialogCliente extends JFrame {
 	}
 
 	protected void cargarDatos() {
+		
 		Connection conn = null;
-
 		try {
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/Liceo?serverTimezone=Europe/Madrid",
 					this.usuario, this.contrasena);
 
-			String cod = JOptionPane.showInputDialog(this, "Introduzca código", "Cargar datos",
-					JOptionPane.QUESTION_MESSAGE);
-			if (cod == null || cod.equals("")) {// si dni es diferente a null y a campo vacio sale del dialogo
+			String cod = JOptionPane.showInputDialog(this, "Introduzca código", "Cargar datos", JOptionPane.QUESTION_MESSAGE);
+			if (cod == null || cod.equals("")) {// si cod es null (BCancel) o campo vacio sale del dialogo
 
-				// if (cod == null) {
-				JOptionPane.showMessageDialog(this, "No existe ningún cliente con el código " + cod, "Error",
-						JOptionPane.ERROR_MESSAGE);
+				
+				JOptionPane.showMessageDialog(this, "No existe ningún objeto con el Código  " +cod, "Error",
+						JOptionPane.ERROR_MESSAGE);				
 
-//			}else {
-//				JOptionPane.showMessageDialog(this, "No existe ningún cliente " + cod, "Error",
-//						JOptionPane.ERROR_MESSAGE);
+//			
 
 				return;
 
 			}
-			
-		mostrarDatos(conn, cod);
-			isCrear = true;
 
+			mostrarDatos(conn, cod);
+			
+			isCrear = true;
+			
+	
+
+	
 		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
 			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error al cargar datos", JOptionPane.ERROR_MESSAGE);
 
@@ -526,7 +527,7 @@ public class DialogCliente extends JFrame {
 			ps2.setString(1, txtCodigo.getText());
 
 			ps2.executeUpdate();
-			
+
 			mostrarDatos(conn, txtCodigo.getText());
 
 		} catch (SQLException ex) {// SQLexcetion se da cunado no hay conewxion o algun error con la bbdd
@@ -680,14 +681,14 @@ public class DialogCliente extends JFrame {
 		setVisible(false);
 
 	}
-	
+
 	private void mostrarDatos(Connection conn, String cod) throws SQLException {
-		
+
 		PreparedStatement ps = conn.prepareStatement(
 				"SELECT Cod, Des, Tipo, Marca, Modelo, NumSerie, Resp, Local, FecAlta, FecMod, FecBaja, Motivo, Obs FROM actual WHERE Cod = ?");
 		ps.setString(1, cod);// valor un que se gurda en resultst
 		ResultSet rs = ps.executeQuery(); //
-		if (rs.first()) {
+		if (rs.first()) {// first = el puntero marcará la siguiente fila en la que se imprimen datos
 
 			txtCodigo.setText(cod);
 			// txtCodigo.setEditable(false);
@@ -703,8 +704,13 @@ public class DialogCliente extends JFrame {
 			txtFechaBaja.setText(rs.getTimestamp("FecBaja") + "");
 			txtMotBaja.setText(rs.getString("Motivo"));
 			txtObservaciones.setText(rs.getString("Obs"));
+			
+		}else {
+			JOptionPane.showMessageDialog(this, "No existe ningún objeto con el Código  " + cod, "Error",
+					JOptionPane.ERROR_MESSAGE);
 		}
-		
+		}
+
 	}
 
-}
+
